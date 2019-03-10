@@ -1,5 +1,5 @@
 <?php
-include_once "/var/www/html/wp-config.php";
+include_once __DIR__ . "/../../../../wp-config.php";
 
 function get_API_key() {
 $dsn = "mysql:dbname=".DB_NAME.";host=".DB_HOST;

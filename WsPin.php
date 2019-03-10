@@ -107,7 +107,7 @@ if ( strtolower($a['action']) == 'playing' ) { // playlist
             request.onload = function () {
                 document.querySelector('#spin-recent').innerHTML = request.responseText;
             };
-            request.open('GET', 'https://ksqd.org/recent.php?count=$count', true);
+            request.open('GET', 'https://' + window.location.hostname + "/recentt.php?count=$count", true);
             request.send();
         }, 15000);
     }());
