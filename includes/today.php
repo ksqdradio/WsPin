@@ -24,19 +24,25 @@ include __DIR__ . '/getClient.php';
  */
 function today($count) {
 	global $client;
-	$rstring = "";
+//	$rstring = "";
 
+	$acount =abs($count);
 	// calls Spinitron API and returns array with shows
-	$result = $client->search('shows', ['end' => "+$count hour"]);
+	$result = $client->search('shows', ['end' => "+$acount hour"]);
 
+	$tcnt = 0 ; // looks for first one to delete if necessary
 	foreach ($result['items'] as $show) {
-                $stime = new DateTime($show['start']);
-		$stime = $stime->setTimezone(new DateTimeZone($show['timezone']));
-                $stime = $stime->format('g:ia') ;
-		$title = htmlspecialchars($show['title'], ENT_NOQUOTES);
-		$rstring .= <<<EOT
-<p class='spin_today'>$stime <strong>$title</strong></p>
+		if ( ($count >= 0) || ($tcnt != 0) ) {
+			$stime = new DateTime($show['start']);
+			$stime = $stime->setTimezone(new DateTimeZone($show['timezone']));
+			$stime = $stime->format('g:ia') ;
+			$title = htmlspecialchars($show['title'], ENT_NOQUOTES);
+			$href  = !is_null($show['url']) ? $show['url'] : "#" ;
+			$rstring .= <<<EOT
+<p class='spin_today'>$stime <a href="$href">$title</a></p>
 EOT;
+		}
+		$tcnt++ ;
 	}
 	return $rstring;
 }

@@ -60,26 +60,32 @@ function WsPin_options_page() {
 	</form>
 	<h4>Usage</h4>
 	<p>Insert the following shortcodes in pages where needed</p>
-	<p><code>[wspin action="playing" count="5"]</code><br>
+	<p><code>[wspin action="playing" count="5",show_id=""]</code><br>
 	<span>count defaults to 5</span><br>
-	<span>Lists the last (count) songs playing</span></p>
+	<span>Lists the last (count) songs playing</span><br>
+	<span>show_id defaults to blank, if used playlist is for that show.
+	</span></p>
 	<p><code>[wspin action="upnext" count="5"]</code><br>
 	<span>count defaults to 5</span><br>
 	<span>Lists the next (count) hours programs</span><br>
+	<span>A negative number removes the current program from the list</span><br>
 	<span>Use '0' (zero) for only one program</span></p>
+	<p><code>[wspin action="showlist"]</code><br>
+	<span>Lists all the scheduled programs</span><p>
 	<p><code>[wspin action="refresh" count="5"]</code><br>
 	<span>count defaults to 5</span><br>
 	<span>Inserts JavaScript into page to refresh the play list every 15 seconds.</span><br>
 	<span>count is how many songs to list</span></p>
 	<p>Note: HTML responses are wrapped in a paragraph class styled
 	in the theme appearance menu.  "spin_recent" and "spin_today"
-	are the associated classes.</p>
+	and "spin_list" are the associated classes.</p>
 	<?php
 }
 
 add_shortcode('wspin', 'wspin_spinapi');
 include_once('includes/recent.php');
 include_once('includes/today.php');
+include_once('includes/showlist.php');
 
 /** Actual shortcode code
  *  @param $atts is an array of passed parameters, default null
@@ -91,10 +97,11 @@ function wspin_spinapi($atts=[], $content=null,$tag='') {
 $a = shortcode_atts( array(
 	'action' => "",
 	'count' => 5,
+	'show_id' =>"",
 ), $atts );
 $rstring = ""; // return string, required in WP
 if ( strtolower($a['action']) == 'playing' ) { // playlist
-	$rstring = recent(intval($a['count'])) ; // count is how many songs
+	$rstring = recent(intval($a['count']),$a['show_id']) ; // count is how many songs
 } else if ( strtolower($a['action']) == 'upnext' ) { // next prograrms
 	$rstring = today(intval($a['count'])) ;  // count is hours into future
 } else if ( strtolower($a['action']) == 'refresh' ) { // next prograrms
@@ -113,8 +120,11 @@ if ( strtolower($a['action']) == 'playing' ) { // playlist
     }());
 </script>
 EOT;
+} else if ( strtolower($a['action']) == 'showlist' ) { // next prograrms
+	$rstring = showlist() ;  // all shows
 }
+//$file = './rstring.txt';
+//file_put_contents($file, $rstring);
 return $rstring;
 }
 ?>
-

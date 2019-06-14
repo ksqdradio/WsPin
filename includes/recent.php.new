@@ -20,44 +20,46 @@ include __DIR__ . '/getClient.php';
 
 /** recent function returns formatted html for recent playlist
  *  @param count is how many songs to return
- *  @param show_id is show to return playlist from, blank is all
  */
-function recent($count,$show_id) {
+function recent($count) {
 	global $client;
 
 	$dateTimeZoneLA = new DateTimeZone("America/Los_Angeles"); // timezone
+	$acount = abs($count); // allows for negative number to signal we don't want the first one.
 	// get cached playlist from API
-	$params = array('count' => $count);
-	if (!empty($show_id)) {
-		$params['show_id'] = $show_id;
-	}
-	$result = $client->search('spins', $params);
+	$result = $client->search('spins', ['count' => $acount]);
+	$tct = 0 ; // keeps track of how many we have so we can delete first one
 	foreach ($result['items'] as $spin) { 
-/*		$stime2 = new DateTime($spin['start']);
-		$stime = new DateTime($spin['start']);
-		$offset = -timezone_offset_get($dateTimeZoneLA, $stime)/3600;
+		if ( ($count >= 0) || ($tct == 0) ) {
+			$stime2 = new DateTime($spin['start']);
+			$stime = new DateTime($spin['start']);
+			$offset = -timezone_offset_get($dateTimeZoneLA, $stime)/3600;
 			// get interval between here and UTC
-		$stime->sub(new DateInterval("PT".$offset."H")); 
+			$stime->sub(new DateInterval("PT".$offset."H")); 
 			// fixes timezone
 			// 'start' has -8:00 as timezone,
 			// but DateInterval changes to UTC 
-*/
-			$stime = new DateTime($spin['start']);
-			$stime = $stime->setTimezone(new DateTimeZone($spin['timezone']));
-		$stime = $stime->format('g:ia') ;
-       	 $artist  = htmlspecialchars($spin['artist'],  ENT_NOQUOTES); 
-       	 $song    = htmlspecialchars($spin['song'],    ENT_NOQUOTES); 
-         $release = htmlspecialchars($spin['release'], ENT_NOQUOTES);
+			$stime = $stime->format('g:ia') ;
+			$artist  = htmlspecialchars($spin['artist'],  ENT_NOQUOTES); 
+			$song    = htmlspecialchars($spin['song'],    ENT_NOQUOTES); 
+			$release = htmlspecialchars($spin['release'], ENT_NOQUOTES);
 
- 	 $rstring .= <<<EOT
+		$rstring .= <<<EOT
     <p class='spin_recent'>$stime
         <strong>$artist</strong>
         <em>'$song'</em>
         from $release</p>
 EOT;
-	$tz = $spin['timezone'];
+		$tz = $spin['timezone'];
+		}
+	$tct++ ;
 	}
 
 	$tdate = gmdate('H:i:s');
+/*	$rstring .= <<<EOT
+<p>
+    <small>(Updated $tdate UTC)</small>
+</p>
+EOT; */
 	return $rstring ;
 }
