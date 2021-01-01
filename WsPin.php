@@ -65,11 +65,13 @@ function WsPin_options_page() {
 	<span>Lists the last (count) songs playing</span><br>
 	<span>show_id defaults to blank, if used playlist is for that show.
 	</span></p>
-	<p><code>[wspin action="upnext" count="5"]</code><br>
+	<p><code>[wspin action="upnext" count="5" show_id =""]</code><br>
 	<span>count defaults to 5</span><br>
 	<span>Lists the next (count) hours programs</span><br>
 	<span>A negative number removes the current program from the list</span><br>
-	<span>Use '0' (zero) for only one program</span></p>
+	<span>Use '0' (zero) for only one program</span>
+	<span>show_id defaults to blank, if used lists the next slots for that show.
+	</span></p>
 	<p><code>[wspin action="showlist"]</code><br>
 	<span>Lists all the scheduled programs</span><p>
 	<p><code>[wspin action="refresh" count="5"]</code><br>
@@ -103,7 +105,7 @@ $rstring = ""; // return string, required in WP
 if ( strtolower($a['action']) == 'playing' ) { // playlist
 	$rstring = recent(intval($a['count']),$a['show_id']) ; // count is how many songs
 } else if ( strtolower($a['action']) == 'upnext' ) { // next prograrms
-	$rstring = today(intval($a['count'])) ;  // count is hours into future
+	$rstring = today(intval($a['count']),$a['show_id']) ;  // count is hours into future
 } else if ( strtolower($a['action']) == 'refresh' ) { // next prograrms
 	$count = intval($a['count']) ;
 	$rstring = <<<EOT

@@ -22,27 +22,38 @@ include __DIR__ . '/getClient.php';
  *  @param count is how many hours in the future to return data for
  *  use '0' if you only want one
  */
-function today($count) {
+function today($count,$show_id) {
 	global $client;
 //	$rstring = "";
 
 	$acount =abs($count);
 	// calls Spinitron API and returns array with shows
-	$result = $client->search('shows', ['end' => "+$acount hour"]);
-
-	$tcnt = 0 ; // looks for first one to delete if necessary
-	foreach ($result['items'] as $show) {
-		if ( ($count >= 0) || ($tcnt != 0) ) {
-			$stime = new DateTime($show['start']);
-			$stime = $stime->setTimezone(new DateTimeZone($show['timezone']));
-			$stime = $stime->format('g:ia') ;
-			$title = htmlspecialchars($show['title'], ENT_NOQUOTES);
-			$href  = !is_null($show['url']) ? $show['url'] : "#" ;
-			$rstring .= <<<EOT
+	if ( empty($show_id) ) {
+		$result = $client->search('shows', ['end' => "+$acount hour"]);
+		$tcnt = 0 ; // looks for first one to delete if necessary
+		foreach ($result['items'] as $show) {
+			if ( ($count >= 0) || ($tcnt != 0) ) {
+				$stime = new DateTime($show['start']);
+				$stime = $stime->setTimezone(new DateTimeZone($show['timezone']));
+				$stime = $stime->format('g:ia') ;
+				$title = htmlspecialchars($show['title'], ENT_NOQUOTES);
+				$href  = !is_null($show['url']) ? $show['url'] : "#" ;
+				$rstring .= <<<EOT
 <p class='spin_today'>$stime <a href="$href">$title</a></p>
 EOT;
+			}
+			$tcnt++ ;
 		}
-		$tcnt++ ;
+	} else {
+		$result = $client->search('shows/' . $show_id, []);
+		$stime = new DateTime($result['start']);
+		$stime = $stime->setTimezone(new DateTimeZone($result['timezone']));
+		$stime = $stime->format('l, F j g:ia') ;
+		$title = htmlspecialchars($result['title'], ENT_NOQUOTES);
+		$href  = !is_null($result['url']) ? $result['url'] : "#" ;
+		$rstring .= <<<EOT
+<p class='spin_today'>$stime </p>
+EOT;
 	}
 	return $rstring;
 }
